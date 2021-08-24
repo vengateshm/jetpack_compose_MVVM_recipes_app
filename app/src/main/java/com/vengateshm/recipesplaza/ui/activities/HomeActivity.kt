@@ -90,7 +90,7 @@ fun CategoryItem(category: Category) {
     Card(
         modifier = Modifier.padding(8.dp),
     ) {
-        Column. {
+        Column {
             CategoryThumbnail(thumbnailUrl = category.strCategoryThumb)
             Text(
                 modifier = Modifier.padding(8.dp),
