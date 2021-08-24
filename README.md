@@ -14,7 +14,7 @@ This is a simple recipes app developed using android Jetpack compose.
 
 # Kotlin DSLs
 - **data** class
-- **Object** (Singleton instance for retrofit api client)
+- **object** (Singleton instance for retrofit api client)
 - **suspendCancellableCoroutine** (Convert Retrofit Call to coroutines)
 - **sealed** class
 - Scope functions (let, also)
