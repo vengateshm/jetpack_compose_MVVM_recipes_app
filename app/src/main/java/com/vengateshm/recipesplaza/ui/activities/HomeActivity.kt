@@ -1,14 +1,12 @@
 package com.vengateshm.recipesplaza.ui.activities
 
-import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,19 +19,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.vengateshm.recipesplaza.R
-import com.vengateshm.recipesplaza.model.Category
+import com.vengateshm.recipesplaza.model.RecipeCategory
 import com.vengateshm.recipesplaza.model.ScreenState
+import com.vengateshm.recipesplaza.ui.composeViews.loadPicture
 import com.vengateshm.recipesplaza.ui.viewmodels.HomeViewModel
+import com.vengateshm.recipesplaza.utils.KEY_RECIPE_CATEGORY_ID
 
 class HomeActivity : ComponentActivity() {
 
@@ -46,7 +42,15 @@ class HomeActivity : ComponentActivity() {
         setContent {
             val screenState = viewModel.screenState.observeAsState()
             screenState.value?.let {
-                CategoriesScreen(screenState = it)
+                CategoriesScreen(screenState = it) { category ->
+                    Intent(this@HomeActivity, RecipesActivity::class.java)
+                        .apply {
+                            putExtra(KEY_RECIPE_CATEGORY_ID, category.strCategory)
+                        }
+                        .also {
+                            startActivity(it)
+                        }
+                }
             }
         }
     }
@@ -54,7 +58,10 @@ class HomeActivity : ComponentActivity() {
 
 @ExperimentalUnitApi
 @Composable
-fun CategoriesScreen(screenState: ScreenState<List<Category>>) {
+fun CategoriesScreen(
+    screenState: ScreenState<List<RecipeCategory>>,
+    onCategoryClicked: (RecipeCategory) -> Unit,
+) {
     Box(modifier = Modifier
         .padding(16.dp)
         .fillMaxWidth()
@@ -65,7 +72,7 @@ fun CategoriesScreen(screenState: ScreenState<List<Category>>) {
                 CircularProgressIndicator()
             }
             is ScreenState.Success -> {
-                CategoriesList(categories = screenState.data)
+                CategoriesList(recipeCategories = screenState.data, onCategoryClicked)
             }
             is ScreenState.Error -> {
 
@@ -76,25 +83,25 @@ fun CategoriesScreen(screenState: ScreenState<List<Category>>) {
 
 @ExperimentalUnitApi
 @Composable
-fun CategoriesList(categories: List<Category>) {
+fun CategoriesList(recipeCategories: List<RecipeCategory>, onCategoryClicked: (RecipeCategory) -> Unit) {
     LazyColumn {
-        items(categories) { category ->
-            CategoryItem(category = category)
+        items(recipeCategories) { category ->
+            CategoryItem(recipeCategory = category, onCategoryClicked)
         }
     }
 }
 
 @ExperimentalUnitApi
 @Composable
-fun CategoryItem(category: Category) {
-    Card(
-        modifier = Modifier.padding(8.dp),
-    ) {
-        Column {
-            CategoryThumbnail(thumbnailUrl = category.strCategoryThumb)
+fun CategoryItem(recipeCategory: RecipeCategory, onCategoryClicked: (RecipeCategory) -> Unit) {
+    Card(modifier = Modifier.padding(8.dp)) {
+        Column(modifier = Modifier.clickable(onClick = {
+            onCategoryClicked(recipeCategory)
+        })) {
+            CategoryThumbnail(thumbnailUrl = recipeCategory.strCategoryThumb)
             Text(
                 modifier = Modifier.padding(8.dp),
-                text = category.strCategory,
+                text = recipeCategory.strCategory,
                 style = TextStyle(color = Color(0xFF333333),
                     fontSize = TextUnit(20f, TextUnitType.Sp)))
             /*Spacer(modifier = Modifier.height(4.dp))
@@ -114,41 +121,6 @@ fun CategoryThumbnail(thumbnailUrl: String) {
                 .fillMaxWidth(),
             contentScale = ContentScale.Crop)
     }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Composable
-fun loadPicture(url: String, @DrawableRes defaultImage: Int): MutableState<Bitmap?> {
-    val bitmapState: MutableState<Bitmap?> = mutableStateOf(null)
-
-    // Load placeholder image
-    Glide.with(LocalContext.current)
-        .asBitmap()
-        .load(defaultImage)
-        .into(object : CustomTarget<Bitmap>() {
-            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                bitmapState.value = resource
-            }
-
-            override fun onLoadCleared(placeholder: Drawable?) {
-
-            }
-        })
-
-    // Load original image from network
-    Glide.with(LocalContext.current)
-        .asBitmap()
-        .load(url)
-        .into(object : CustomTarget<Bitmap>() {
-            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                bitmapState.value = resource
-            }
-
-            override fun onLoadCleared(placeholder: Drawable?) {
-
-            }
-        })
-    return bitmapState
 }
 
 // With state hoisting

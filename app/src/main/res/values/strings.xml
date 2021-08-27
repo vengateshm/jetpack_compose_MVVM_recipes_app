@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RecipesPlaza</string>
+    <string name="title_activity_meal_landing">MealLandingActivity</string>
 </resources>

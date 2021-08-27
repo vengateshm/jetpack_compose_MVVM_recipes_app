@@ -1,6 +1,6 @@
 package com.vengateshm.recipesplaza.model
 
-data class Category(
+data class RecipeCategory(
     val idCategory: String,
     val strCategory: String,
     val strCategoryDescription: String,

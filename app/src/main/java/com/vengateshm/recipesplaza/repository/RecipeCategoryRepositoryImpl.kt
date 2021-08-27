@@ -2,7 +2,7 @@ package com.vengateshm.recipesplaza.repository
 
 import com.vengateshm.recipesplaza.model.ApiResult
 import com.vengateshm.recipesplaza.network.MealApiClient
-import com.vengateshm.recipesplaza.network.response.CategoriesResponse
+import com.vengateshm.recipesplaza.network.response.RecipeCategoriesResponse
 import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.Call
 import retrofit2.Callback
@@ -10,14 +10,14 @@ import retrofit2.Response
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class CategoryRepositoryImpl : CategoryRepository {
-    override suspend fun getAllCategories(): ApiResult<CategoriesResponse> =
+class RecipeCategoryRepositoryImpl : RecipeCategoryRepository {
+    override suspend fun getAllCategories(): ApiResult<RecipeCategoriesResponse> =
         suspendCancellableCoroutine { cancellableContinuation ->
-            MealApiClient.mealApi.getAllCategories()
-                .enqueue(object : Callback<CategoriesResponse> {
+            MealApiClient.RECIPE_API.getAllCategories()
+                .enqueue(object : Callback<RecipeCategoriesResponse> {
                     override fun onResponse(
-                        call: Call<CategoriesResponse>,
-                        response: Response<CategoriesResponse>,
+                        call: Call<RecipeCategoriesResponse>,
+                        response: Response<RecipeCategoriesResponse>,
                     ) {
                         if (response.isSuccessful && response.body() != null)
                             cancellableContinuation.resume(ApiResult.Success(response.body()!!))
@@ -25,7 +25,7 @@ class CategoryRepositoryImpl : CategoryRepository {
                             cancellableContinuation.resumeWithException(Exception("Failure response."))
                     }
 
-                    override fun onFailure(call: Call<CategoriesResponse>, t: Throwable) {
+                    override fun onFailure(call: Call<RecipeCategoriesResponse>, t: Throwable) {
                         cancellableContinuation.resumeWithException(t)
                     }
                 })
