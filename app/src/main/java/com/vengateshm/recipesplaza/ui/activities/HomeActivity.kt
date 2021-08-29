@@ -1,6 +1,7 @@
 package com.vengateshm.recipesplaza.ui.activities
 
 import android.content.Intent
+import android.content.res.AssetManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
@@ -28,6 +30,7 @@ import com.vengateshm.recipesplaza.R
 import com.vengateshm.recipesplaza.model.RecipeCategory
 import com.vengateshm.recipesplaza.model.ScreenState
 import com.vengateshm.recipesplaza.ui.composeViews.loadPicture
+import com.vengateshm.recipesplaza.ui.theme.CustomFontTheme
 import com.vengateshm.recipesplaza.ui.viewmodels.HomeViewModel
 import com.vengateshm.recipesplaza.utils.KEY_RECIPE_CATEGORY_ID
 
@@ -35,21 +38,26 @@ class HomeActivity : ComponentActivity() {
 
     private val viewModel: HomeViewModel by viewModels()
 
+    @ExperimentalTextApi
     @ExperimentalUnitApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.observeMealCategories()
         setContent {
-            val screenState = viewModel.screenState.observeAsState()
-            screenState.value?.let {
-                CategoriesScreen(screenState = it) { category ->
-                    Intent(this@HomeActivity, RecipesActivity::class.java)
-                        .apply {
-                            putExtra(KEY_RECIPE_CATEGORY_ID, category.strCategory)
+            assets?.let {
+                CustomFontTheme(assetManager = it, fontFilePath = "fonts/opensans") {
+                    val screenState = viewModel.screenState.observeAsState()
+                    screenState.value?.let {
+                        CategoriesScreen(screenState = it) { category ->
+                            Intent(this@HomeActivity, RecipesActivity::class.java)
+                                .apply {
+                                    putExtra(KEY_RECIPE_CATEGORY_ID, category.strCategory)
+                                }
+                                .also {
+                                    startActivity(it)
+                                }
                         }
-                        .also {
-                            startActivity(it)
-                        }
+                    }
                 }
             }
         }
@@ -83,7 +91,10 @@ fun CategoriesScreen(
 
 @ExperimentalUnitApi
 @Composable
-fun CategoriesList(recipeCategories: List<RecipeCategory>, onCategoryClicked: (RecipeCategory) -> Unit) {
+fun CategoriesList(
+    recipeCategories: List<RecipeCategory>,
+    onCategoryClicked: (RecipeCategory) -> Unit,
+) {
     LazyColumn {
         items(recipeCategories) { category ->
             CategoryItem(recipeCategory = category, onCategoryClicked)
@@ -102,8 +113,7 @@ fun CategoryItem(recipeCategory: RecipeCategory, onCategoryClicked: (RecipeCateg
             Text(
                 modifier = Modifier.padding(8.dp),
                 text = recipeCategory.strCategory,
-                style = TextStyle(color = Color(0xFF333333),
-                    fontSize = TextUnit(20f, TextUnitType.Sp)))
+                style = MaterialTheme.typography.h1)
             /*Spacer(modifier = Modifier.height(4.dp))
             Text(text = category.strCategoryDescription,
                 style = TextStyle(color = Color(0xFF777777),

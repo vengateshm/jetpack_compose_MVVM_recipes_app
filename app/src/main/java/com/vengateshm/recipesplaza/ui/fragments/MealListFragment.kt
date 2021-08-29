@@ -11,20 +11,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.unit.ExperimentalUnitApi
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -32,11 +30,13 @@ import com.vengateshm.recipesplaza.R
 import com.vengateshm.recipesplaza.model.Recipe
 import com.vengateshm.recipesplaza.model.ScreenState
 import com.vengateshm.recipesplaza.ui.composeViews.loadPicture
+import com.vengateshm.recipesplaza.ui.theme.CustomFontTheme
 import com.vengateshm.recipesplaza.ui.viewmodels.RecipeViewModel
 
 class MealListFragment : Fragment() {
     private val recipeViewModel: RecipeViewModel by activityViewModels()
 
+    @ExperimentalTextApi
     @ExperimentalUnitApi
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,18 +48,22 @@ class MealListFragment : Fragment() {
                 viewLifecycleOwner))
             recipeViewModel.getMealsByCategory(recipeViewModel.selectedMealCategory)
             setContent {
-                val screenState = recipeViewModel.recipeList.observeAsState()
-                screenState.value?.let {
-                    MealListScreen(screenState = it) { meal ->
-                        if (meal.idMeal.isEmpty())
-                            return@MealListScreen
-                        recipeViewModel.setSelectedMealId(meal.idMeal)
-                        with(requireActivity()) {
-                            this.supportFragmentManager.beginTransaction()
-                                .add(R.id.mealLandingFragmentContainer,
-                                    MealDetailsFragment.newInstance())
-                                .addToBackStack(null)
-                                .commitAllowingStateLoss()
+                requireActivity().assets?.let {
+                    CustomFontTheme(assetManager = it, fontFilePath = "fonts/opensans") {
+                        val screenState = recipeViewModel.recipeList.observeAsState()
+                        screenState.value?.let {
+                            MealListScreen(screenState = it) { meal ->
+                                if (meal.idMeal.isEmpty())
+                                    return@MealListScreen
+                                recipeViewModel.setSelectedMealId(meal.idMeal)
+                                with(requireActivity()) {
+                                    this.supportFragmentManager.beginTransaction()
+                                        .add(R.id.mealLandingFragmentContainer,
+                                            MealDetailsFragment.newInstance())
+                                        .addToBackStack(null)
+                                        .commitAllowingStateLoss()
+                                }
+                            }
                         }
                     }
                 }
@@ -82,7 +86,7 @@ fun MealListScreen(
         .padding(16.dp)
         .fillMaxWidth()
         .fillMaxHeight(),
-        contentAlignment = Alignment.Center) {
+        contentAlignment = Alignment.TopStart) {
         when (screenState) {
             is ScreenState.Loading -> {
                 CircularProgressIndicator()
@@ -121,8 +125,7 @@ fun MealItem(recipe: Recipe, onMealClicked: (Recipe) -> Unit) {
             Text(
                 modifier = Modifier.padding(8.dp),
                 text = recipe.strMeal,
-                style = TextStyle(color = Color(0xFF333333),
-                    fontSize = TextUnit(20f, TextUnitType.Sp)))
+                style = MaterialTheme.typography.h1)
         }
     }
 }

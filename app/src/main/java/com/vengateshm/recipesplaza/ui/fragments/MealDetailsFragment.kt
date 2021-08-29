@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
@@ -24,12 +26,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.vengateshm.recipesplaza.model.RecipeDetail
 import com.vengateshm.recipesplaza.model.ScreenState
+import com.vengateshm.recipesplaza.ui.theme.CustomFontTheme
 import com.vengateshm.recipesplaza.ui.viewmodels.RecipeViewModel
 
 class MealDetailsFragment : Fragment() {
 
     private val recipeViewModel: RecipeViewModel by activityViewModels()
 
+    @ExperimentalTextApi
     @ExperimentalUnitApi
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,10 +45,14 @@ class MealDetailsFragment : Fragment() {
                 viewLifecycleOwner))
             recipeViewModel.getMealDetailsById(recipeViewModel.selectedMealId)
             setContent {
-                Surface {
-                    val screenState = recipeViewModel.mealsDetail.observeAsState()
-                    screenState.value?.let { mealDetailList ->
-                        MealsDetailScreen(mealDetailList)
+                requireActivity().assets?.let {
+                    CustomFontTheme(assetManager = it, fontFilePath = "fonts/opensans") {
+                        Surface {
+                            val screenState = recipeViewModel.mealsDetail.observeAsState()
+                            screenState.value?.let { mealDetailList ->
+                                MealsDetailScreen(mealDetailList)
+                            }
+                        }
                     }
                 }
             }
@@ -81,9 +89,7 @@ private fun MealsDetailScreen(screenState: ScreenState<List<RecipeDetail>>) {
                     val mealDetail = if (screenState.data.isEmpty()) null else screenState.data[0]
                     if (mealDetail != null) {
                         Text(text = mealDetail.strMeal!!,
-                            style = TextStyle(
-                                color = Color(0xFF333333),
-                                fontSize = TextUnit(18f, TextUnitType.Sp)))
+                            style = MaterialTheme.typography.h1)
                         MealsInstructions(instructions = (mealDetail.strInstructions!!))
                     }
                 }
@@ -100,7 +106,8 @@ private fun MealsDetailScreen(screenState: ScreenState<List<RecipeDetail>>) {
 fun MealsInstructions(instructions: String) {
     Column {
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Instructions")
+        Text(text = "Instructions",
+            style = MaterialTheme.typography.h2)
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = instructions,
             style = TextStyle(color = Color(red = 55, green = 55, blue = 55),

@@ -1,10 +1,13 @@
 package com.vengateshm.recipesplaza.ui.theme
 
+import android.content.res.AssetManager
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.unit.ExperimentalUnitApi
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -30,7 +33,7 @@ private val LightColorPalette = lightColors(
 @Composable
 fun RecipesPlazaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable() () -> Unit,
 ) {
     val colors = if (darkTheme) {
         DarkColorPalette
@@ -41,6 +44,31 @@ fun RecipesPlazaTheme(
     MaterialTheme(
         colors = colors,
         typography = Typography,
+        shapes = Shapes,
+        content = content
+    )
+}
+
+@ExperimentalUnitApi
+@ExperimentalTextApi
+@Composable
+fun CustomFontTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    assetManager: AssetManager,
+    fontFilePath: String,
+    content: @Composable() () -> Unit,
+) {
+    val colors = if (darkTheme) {
+        DarkColorPalette
+    } else {
+        LightColorPalette
+    }
+
+    val fontFamily = fontFamilyFromAsset(assetManager,fontFilePath)
+
+    MaterialTheme(
+        colors = colors,
+        typography = customFontTypography(fontFamily),
         shapes = Shapes,
         content = content
     )
