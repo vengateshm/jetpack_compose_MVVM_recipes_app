@@ -89,7 +89,15 @@ fun MealListScreen(
         contentAlignment = Alignment.TopStart) {
         when (screenState) {
             is ScreenState.Loading -> {
-                CircularProgressIndicator()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
             is ScreenState.Success -> {
                 MealsList(mealsList = screenState.data, onMealClicked)
